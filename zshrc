@@ -41,3 +41,5 @@ _load_settings "$HOME/.zsh/configs"
 [[ -f ~/.aliases ]] && source ~/.aliases
 
 export GLAMOUR_STYLE=dark
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
