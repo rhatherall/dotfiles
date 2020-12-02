@@ -45,6 +45,8 @@ Plug 'tpope/vim-surround'
 Plug 'vim-ruby/vim-ruby'
 Plug 'vim-scripts/tComment'
 Plug 'hashivim/vim-terraform'
+Plug 'brooth/far.vim'
+Plug 'rainerborene/vim-reek'
 
 if g:has_async
   Plug 'dense-analysis/ale'
