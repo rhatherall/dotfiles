@@ -47,6 +47,7 @@ Plug 'vim-scripts/tComment'
 Plug 'hashivim/vim-terraform'
 Plug 'brooth/far.vim'
 Plug 'rainerborene/vim-reek'
+Plug 'altercation/vim-colors-solarized'
 
 if g:has_async
   Plug 'dense-analysis/ale'

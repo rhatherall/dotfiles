@@ -175,6 +175,11 @@ set complete+=kspell
 " Always use vertical diffs
 set diffopt+=vertical
 
+" Set colorscheme to solarized
+syntax enable
+set background=dark
+colorscheme solarized
+
 " Local config
 if filereadable($HOME . "/.vimrc.local")
   source ~/.vimrc.local
