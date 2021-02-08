@@ -43,3 +43,6 @@ _load_settings "$HOME/.zsh/configs"
 export GLAMOUR_STYLE=dark
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# iTerm2 Shell Integration
+[[ -f ~/.iterm2_shell_integration.zsh ]] && source ~/.iterm2_shell_integration.zsh
