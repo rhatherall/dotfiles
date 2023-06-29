@@ -1,5 +1,31 @@
 -- LSP settings.
 
+-- Set up cool signs for diagnostics
+local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+end
+-- Diagnostic config
+local config = {
+  virtual_text = false,
+  signs = {
+    active = signs,
+  },
+  update_in_insert = true,
+  underline = true,
+  severity_sort = true,
+  float = {
+    focusable = true,
+    style = "minimal",
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+  },
+}
+vim.diagnostic.config(config)
+
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
@@ -64,6 +90,10 @@ local servers = {
       telemetry = { enable = false },
     },
   },
+
+  solargraph = {
+    diagnostics = false
+  }
 }
 
 -- Setup neovim lua configuration
