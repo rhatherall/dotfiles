@@ -14,6 +14,8 @@ function M.setup()
   require("neotest").setup({
     adapters = {
       require("neotest-go"),
+      require("neotest-minitest"),
+      require("neotest-rspec"),
       require("neotest-vitest"),
     },
   })
