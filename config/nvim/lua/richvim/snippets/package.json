@@ -15,6 +15,26 @@
       {
         "language": "typescriptreact",
         "path": "./typescript/react.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml/yaml-condition-functions.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml/yaml-general.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml/yaml-intrinsic-functions.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml/yaml-parameter-types.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml/yaml-resource-types.json"
       }
     ]
   }
