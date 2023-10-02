@@ -9,6 +9,7 @@ function M.setup()
   mason.setup()
   mason_lspconfig.setup({
     ensure_installed = {
+      "dockerls", -- LSP for Dockerfile language
       "lua_ls", -- LSP for Lua language
       -- "gopls", -- LSP for Go
       "solargraph", -- LSP for Ruby
