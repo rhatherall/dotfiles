@@ -26,11 +26,3 @@ vim.opt.wrap = false          -- Disable line wrap
 vim.opt.termguicolors = true  -- Enable true color support
 vim.opt.cursorline = true     -- Highlight the current line
 vim.opt.clipboard = "unnamedplus" -- Sync with system clipboard
-
--- Format the current file manually
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format File" })
-
--- Run diagnostics manually
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })

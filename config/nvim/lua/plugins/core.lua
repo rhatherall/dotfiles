@@ -33,6 +33,16 @@ return {
     end
   },
 
+  -- Fuzzy Finder (Telescope)
+  {
+    "sato-s/telescope-rails.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    config = function()
+      require("telescope").load_extension("rails")
+    end,
+  },
+
+
   -- Git Signs (Shows git diff in the sign column)
   {
     "lewis6991/gitsigns.nvim",
@@ -329,5 +339,10 @@ return {
       vim.keymap.set("n", "<S-F9>", ":lua require('dap.ui.widgets').hover()<CR>", { desc = "Inspect Variable" })
       vim.keymap.set("n", "<C-S-F9>", ":DapClearBreakpoints<CR>", { desc = "Clear All Breakpoints" })
     end
+  },
+
+  {
+    "tpope/vim-rails",
+    event = "VeryLazy",
   }
 }
