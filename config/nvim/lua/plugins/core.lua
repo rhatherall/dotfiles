@@ -187,7 +187,7 @@ return {
         mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept completion
-          ["<Tab>"] = function(fallback)
+          ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
@@ -195,14 +195,14 @@ return {
             else
               fallback()
             end
-          end,
-          ["<S-Tab>"] = function(fallback)
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
             else
               fallback()
             end
-          end,
+          end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" }, -- LSP completions
@@ -212,6 +212,17 @@ return {
         })
       })
     end
+  },
+
+  {
+    "L3MON4D3/LuaSnip",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    build = "make install_jsregexp",
+    config = function()
+      require("luasnip").config.setup({ enable_autosnippets = true })
+      require("luasnip.loaders.from_vscode").lazy_load() -- Load VSCode-style snippets
+      require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+    end,
   },
 
   -- None-LS: Community Fork of Null-LS for Linting & Formatting
@@ -344,5 +355,5 @@ return {
   {
     "tpope/vim-rails",
     event = "VeryLazy",
-  }
+  },
 }
