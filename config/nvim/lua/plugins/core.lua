@@ -119,4 +119,88 @@ return {
 
   -- Debugging helper functions
   { "nvim-lua/plenary.nvim" },
+
+    -- LSP Configuration
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      local lspconfig = require("lspconfig")
+
+      -- Ruby LSP (Solargraph)
+      lspconfig.solargraph.setup {
+        settings = {
+          solargraph = {
+            diagnostics = true,
+            formatting = true,
+            completion = true,
+          }
+        }
+      }
+
+      -- Linting with Rubocop
+      lspconfig.rubocop.setup {
+        cmd = { "rubocop", "--lsp" },
+        filetypes = { "ruby" },
+      }
+
+      -- StandardRB (alternative to Rubocop)
+      lspconfig.standardrb.setup {}
+
+      -- Keybindings for LSP
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+      vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find References" })
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Info" })
+      vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+    end
+  },
+
+    -- Completion Engine
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",    -- LSP source
+      "hrsh7th/cmp-buffer",      -- Buffer words completion
+      "hrsh7th/cmp-path",        -- Path completion
+      "L3MON4D3/LuaSnip",        -- Snippets
+      "saadparwaiz1/cmp_luasnip" -- Snippet completion
+    },
+    config = function()
+      local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body) -- Use LuaSnip for snippets
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept completion
+          ["<Tab>"] = function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end,
+          ["<S-Tab>"] = function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            else
+              fallback()
+            end
+          end,
+        }),
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" }, -- LSP completions
+          { name = "buffer" },   -- Buffer words
+          { name = "path" },     -- Path completion
+          { name = "luasnip" },  -- Snippets
+        })
+      })
+    end
+  },
 }
