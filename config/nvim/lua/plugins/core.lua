@@ -78,4 +78,45 @@ return {
       vim.keymap.set("n", "<leader>gq", ":DiffviewClose<CR>", { desc = "Close Diff View" })
     end
   },
+
+  -- Lua Language Server (for editing config and general Lua work)
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      require("lspconfig").lua_ls.setup {
+        settings = {
+          Lua = {
+            runtime = { version = "LuaJIT" },
+            diagnostics = {
+              globals = { "vim" }, -- Prevent "undefined global 'vim'" error
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+          }
+        }
+      }
+    end
+  },
+
+  -- Treesitter for better Lua highlighting
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup {
+        ensure_installed = { "lua" }, -- Add more languages later if needed
+        highlight = { enable = true },
+        indent = { enable = true }
+      }
+    end
+  },
+
+  -- Run Lua code inside Neovim
+  { "bfredl/nvim-luadev" },
+
+  -- Debugging helper functions
+  { "nvim-lua/plenary.nvim" },
 }
