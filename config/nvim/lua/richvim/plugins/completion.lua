@@ -1,0 +1,62 @@
+return {
+    -- Completion Engine
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",    -- LSP source
+      "hrsh7th/cmp-buffer",      -- Buffer words completion
+      "hrsh7th/cmp-path",        -- Path completion
+      "L3MON4D3/LuaSnip",        -- Snippets
+      "saadparwaiz1/cmp_luasnip" -- Snippet completion
+    },
+    config = function()
+      local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body) -- Use LuaSnip for snippets
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept completion
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+        }),
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" }, -- LSP completions
+          { name = "buffer" },   -- Buffer words
+          { name = "path" },     -- Path completion
+          { name = "luasnip" },  -- Snippets
+        })
+      })
+    end
+  },
+
+  {
+    "L3MON4D3/LuaSnip",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    build = "make install_jsregexp",
+    config = function()
+      require("luasnip").config.setup({ enable_autosnippets = true })
+      require("luasnip.loaders.from_vscode").lazy_load() -- Load VSCode-style snippets
+      require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+    end,
+  },
+}

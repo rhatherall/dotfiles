@@ -2,27 +2,17 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- Bootstrap Lazy.nvim (ensures Lazy.nvim is installed before anything else)
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git", "clone", "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git", lazypath
-  })
-end
-vim.opt.rtp:prepend(lazypath)
 
--- Load plugins from the "lua/plugins" directory
-require("lazy").setup("plugins")
+-- Require core settings first
+require("richvim.core.bootstrap") -- Load Lazy.nvim bootstrap
+require("richvim.core.settings") -- General settings (options, UI tweaks)
+require("richvim.core.keymaps")  -- Keybindings
+require("richvim.core.autocmds") -- Auto commands
 
--- Basic options
-vim.opt.number = true        -- Show line numbers
-vim.opt.relativenumber = true -- Relative numbers for better navigation
-vim.opt.expandtab = true      -- Use spaces instead of tabs
-vim.opt.shiftwidth = 2        -- Number of spaces for indentation
-vim.opt.tabstop = 2           -- Number of spaces per tab
-vim.opt.smartindent = true    -- Smart auto-indentation
-vim.opt.wrap = false          -- Disable line wrap
-vim.opt.termguicolors = true  -- Enable true color support
-vim.opt.cursorline = true     -- Highlight the current line
-vim.opt.clipboard = "unnamedplus" -- Sync with system clipboard
+-- Load plugins
+require("lazy").setup("richvim.plugins")
+-- require("richvim.plugin_config") -- Plugin configurations
+
+-- Debugging (optional)
+print("RichVim loaded successfully!")
+
