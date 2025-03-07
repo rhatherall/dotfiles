@@ -40,3 +40,10 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
 -- Keep cursor in the middle when searching
 vim.keymap.set("n", "n", "nzzzv", { noremap = true, silent = true })
 vim.keymap.set("n", "N", "Nzzzv", { noremap = true, silent = true })
+
+-- Normal and Visual mode: Yank to system clipboard with <leader>y
+vim.keymap.set("n", "<leader>y", [["+y]], { noremap = true, silent = true })
+vim.keymap.set("v", "<leader>y", [["+y]], { noremap = true, silent = true })
+
+-- Normal mode: Yank a full line to clipboard
+vim.keymap.set("n", "<leader>Y", [["+Y]], { noremap = true, silent = true })
