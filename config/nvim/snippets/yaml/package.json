@@ -1,0 +1,30 @@
+{
+  "name": "richvim-snippets",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "yaml",
+        "path": "./cloudformation/yaml-condition-functions.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./cloudformation/yaml-general.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./cloudformation/yaml-intrinsic-functions.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./cloudformation/yaml-parameter-types.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./cloudformation/yaml-resource-types.json"
+      }
+    ]
+  }
+}

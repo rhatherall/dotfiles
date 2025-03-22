@@ -3,10 +3,10 @@ local s = ls.snippet
 local t = ls.text_node
 local i = ls.insert_node
 
-ls.add_snippets("ruby", {
+return {
   s("rcont", { -- Rails Controller
     t({ "class " }), i(1, "ControllerName"), t({ " < ApplicationController", "" }),
-    t({ "  def " }), i(2, "index"), t({ "", "    @"), i(3, "objects"), t(" = "), i(4, "Model.all"),
+    t({ "  def " }), i(2, "index"), t({ "", "    @"}), i(3, "objects"), t(" = "), i(4, "Model.all"),
     t({ "", "  end", "", "end" }),
   }),
 
@@ -23,4 +23,4 @@ ls.add_snippets("ruby", {
     t({ "      t." }), i(4, "string"), t(" :"), i(5, "column_name"),
     t({ "", "      t.timestamps", "    end", "  end", "end" }),
   }),
-})
+}
