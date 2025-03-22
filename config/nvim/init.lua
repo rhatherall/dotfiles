@@ -10,7 +10,11 @@ require("richvim.core.keymaps")  -- Keybindings
 require("richvim.core.autocmds") -- Auto commands
 
 -- Load plugins
-require("lazy").setup("richvim.plugins")
+require("lazy").setup("richvim.plugins", {
+  rocks = {
+    enabled = false,
+  }
+})
 -- require("richvim.plugin_config") -- Plugin configurations
 
 -- Debugging (optional)
