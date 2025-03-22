@@ -16,7 +16,3 @@ require("lazy").setup("richvim.plugins", {
   }
 })
 -- require("richvim.plugin_config") -- Plugin configurations
-
--- Debugging (optional)
-print("RichVim loaded successfully!")
-

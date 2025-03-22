@@ -10,6 +10,25 @@ return {
     end
   },
 
+  {
+    "goolord/alpha-nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" }, -- for icons
+    config = function()
+      require("richvim.core.dashboard").setup()
+    end,
+  },
+
+  {
+    "rcarriga/nvim-notify",
+    config = function()
+      vim.notify = require("notify")
+      require("notify").setup({
+        background_colour = "#000000",
+        stages = "fade_in_slide_out",
+      })
+    end,
+  },
+
   -- File Explorer (Nvim-Tree)
   {
     "nvim-tree/nvim-tree.lua",
