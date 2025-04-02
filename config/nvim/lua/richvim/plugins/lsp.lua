@@ -61,6 +61,7 @@ return {
     },
     config = function()
       local null_ls = require("null-ls")
+      local shellcheck = require("richvim.diagnostics.shellcheck")
 
       null_ls.setup({
         sources = {
@@ -72,6 +73,7 @@ return {
           -- Linters
           -- null_ls.builtins.diagnostics.standardrb,  -- StandardRB as a linter
           null_ls.builtins.diagnostics.rubocop,     -- Rubocop as a linter
+          shellcheck,
 
           -- Code Actions
           null_ls.builtins.code_actions.gitsigns,
