@@ -4,7 +4,9 @@
 .bundle
 .byebug_history
 .env
+.envrc
 .git/
+.zed/
 /bower_components/
 /log
 /node_modules/
