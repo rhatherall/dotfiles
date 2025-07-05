@@ -12,7 +12,7 @@
   ci = commit -v
   co = checkout
   l = log --pretty=colored
-  pf = push --force-with-lease
+  pf = push --force-with-lease --force-if-includes
   st = status
 [core]
   excludesfile = ~/.gitignore
