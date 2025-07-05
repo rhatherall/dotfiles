@@ -1,0 +1,21 @@
+paserver() {
+  local paserver_version="${PASERVER_VERSION:-23}"
+  local paserver_path="/Applications/PAServer-$paserver_version.0.app/Contents/MacOS"
+
+  (
+    cd "$paserver_path" || {
+      echo "Error: PAServer version $paserver_version not found."
+      exit 1
+    }
+
+    if [[ $# -gt 0 ]]; then
+      ./paserver "$@"
+    else
+      local password
+      password=$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
+      echo -n "$password" | pbcopy
+      echo "Password copied!"
+      ./paserver -password="$password"
+    fi
+  )
+}
