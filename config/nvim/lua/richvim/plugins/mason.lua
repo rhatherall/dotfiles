@@ -21,7 +21,7 @@ return {
         "lua_ls",   -- Lua LSP (for Neovim)
         "pyright",  -- Python LSP
       },
-      automatic_installation = true, -- Auto-install missing LSPs
+      automatic_installation = false, -- Auto-install missing LSPs
     })
 
     require("mason-null-ls").setup({
@@ -30,7 +30,7 @@ return {
         "prettier", -- JS/TS/CSS formatter
         "eslint_d", -- JS linter
       },
-      automatic_installation = true,
+      automatic_installation = false,
     })
   end
 }

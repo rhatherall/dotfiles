@@ -37,7 +37,7 @@ return {
 
       -- Linting with Rubocop
       lspconfig.rubocop.setup {
-        cmd = { "rubocop", "--lsp" },
+        cmd = { "bundle", "exec", "rubocop", "--lsp" },
         filetypes = { "ruby" },
       }
 
@@ -67,12 +67,16 @@ return {
         sources = {
           -- Formatters
           -- null_ls.builtins.formatting.standardrb,   -- StandardRB for Ruby
-          null_ls.builtins.formatting.rubocop,      -- Rubocop for Ruby
+          null_ls.builtins.formatting.rubocop.with({
+            command = "bundle",
+            args = { "exec", "rubocop", "--auto-correct", "--stdin", "$FILENAME" },
+            to_stdin = true,
+          }),
           null_ls.builtins.formatting.prettier,     -- Prettier (JS, JSON, etc.)
 
           -- Linters
           -- null_ls.builtins.diagnostics.standardrb,  -- StandardRB as a linter
-          null_ls.builtins.diagnostics.rubocop,     -- Rubocop as a linter
+          -- null_ls.builtins.diagnostics.rubocop,     -- Rubocop as a linter
           shellcheck,
 
           -- Code Actions
