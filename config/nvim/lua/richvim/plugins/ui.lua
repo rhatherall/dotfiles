@@ -58,4 +58,14 @@ return {
       require("telescope").load_extension("rails")
     end,
   },
+
+  -- Search and Replace
+  {
+    'nvim-pack/nvim-spectre',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('spectre').setup()
+      vim.keymap.set('n', '<leader>sr', '<cmd>lua require("spectre").open()<CR>', { desc = "Search & Replace (Spectre)" })
+    end,
+  },
 }
