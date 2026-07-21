@@ -19,6 +19,12 @@ alias path='echo $PATH | tr -s ":" "\n"'
 # Terraform
 alias tf="terraform"
 
+# Timewarrior (see also the `tw` function in zsh/functions)
+alias tws="timew start"
+alias twx="timew stop"
+alias twc="timew continue"
+alias tww="timew summary :week"
+
 # Include custom aliases
 if [[ -f ~/.aliases.local ]]; then
   source ~/.aliases.local

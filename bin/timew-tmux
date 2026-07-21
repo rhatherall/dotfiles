@@ -1,0 +1,16 @@
+#!/bin/sh
+# Print the active Timewarrior interval for the tmux status bar.
+# Outputs nothing when timew is missing or no tracking is active.
+
+command -v timew > /dev/null 2>&1 || exit 0
+
+out=$(timew 2> /dev/null)
+case "$out" in
+  Tracking*) ;;
+  *) exit 0 ;;
+esac
+
+tag=$(printf '%s\n' "$out" | sed -n 's/^Tracking //p' | tr -d '"')
+elapsed=$(printf '%s\n' "$out" | awk '/Total/ { print $NF }')
+
+printf '⏱ %s %s' "$tag" "$elapsed"

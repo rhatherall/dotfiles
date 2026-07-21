@@ -1,0 +1,9 @@
+# No arguments: today's Timewarrior summary
+# With arguments: acts like `timew`
+tw() {
+  if [[ $# -gt 0 ]]; then
+    timew "$@"
+  else
+    timew summary :day
+  fi
+}

@@ -8,6 +8,7 @@ require("richvim.core.settings") -- General settings (options, UI tweaks)
 require("richvim.core.keymaps")  -- Keybindings
 require("richvim.core.autocmds") -- Auto commands
 require("richvim.core.filetypes") -- File type configurations
+require("richvim.core.timewarrior") -- Timewarrior time-tracking commands
 
 -- Load plugins
 require("lazy").setup("richvim.plugins", {

@@ -230,6 +230,13 @@ Shell aliases and scripts:
 * `tat` to attach to tmux session named the same as the current directory.
 * `v` for `$VISUAL`.
 
+Documentation
+-------------
+
+Usage guides for tools wired into these dotfiles live in [`docs/`](docs/README.md):
+
+* [Timewarrior](docs/timewarrior.md) — time tracking from the shell, prompt, tmux and Neovim.
+
 Thanks
 ------
 
