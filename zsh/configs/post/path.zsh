@@ -1,11 +1,10 @@
 # ensure dotfiles bin directory is loaded first
 PATH="$HOME/.bin:/usr/local/sbin:$PATH"
 
-# Try loading ASDF from the regular home dir location
-if [ -f "$HOME/.asdf/asdf.sh" ]; then
-  . "$HOME/.asdf/asdf.sh"
-elif which brew >/dev/null; then
-  . "$(brew --prefix asdf)/libexec/asdf.sh"
+# asdf >=0.16 is a single Go binary with no asdf.sh to source — activation is
+# just putting the shims directory on PATH.
+if [ -d "${ASDF_DATA_DIR:-$HOME/.asdf}/shims" ]; then
+  PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 fi
 
 # mkdir .git/safe in the root of repositories you trust
