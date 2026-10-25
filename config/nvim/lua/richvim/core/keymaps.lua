@@ -1,18 +1,14 @@
--- Format the current file manually
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format File" })
-
--- Run diagnostics manually
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
+-- Diagnostics (built-in <C-w>d shows the diagnostic under the cursor)
 vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous Diagnostic" })
 vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next Diagnostic" })
 
 -- Telescope for Rails
-vim.keymap.set("n", "<leader>rs", ":Telescope rails specs<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>rc", ":Telescope rails controllers<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>rm", ":Telescope rails models<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>rv", ":Telescope rails views<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>ri", ":Telescope rails migrations<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>rl", ":Telescope rails libs<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>rs", ":Telescope rails specs<CR>", { noremap = true, silent = true, desc = "Specs" })
+vim.keymap.set("n", "<leader>rc", ":Telescope rails controllers<CR>", { noremap = true, silent = true, desc = "Controllers" })
+vim.keymap.set("n", "<leader>rm", ":Telescope rails models<CR>", { noremap = true, silent = true, desc = "Models" })
+vim.keymap.set("n", "<leader>rv", ":Telescope rails views<CR>", { noremap = true, silent = true, desc = "Views" })
+vim.keymap.set("n", "<leader>ri", ":Telescope rails migrations<CR>", { noremap = true, silent = true, desc = "Migrations" })
+vim.keymap.set("n", "<leader>rl", ":Telescope rails libs<CR>", { noremap = true, silent = true, desc = "Libs" })
 
 -- Move selected lines up/down (normal-mode <C-j>/<C-k> are window navigation)
 vim.keymap.set("v", "<C-j>", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })

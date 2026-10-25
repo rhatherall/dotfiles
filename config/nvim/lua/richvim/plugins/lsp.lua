@@ -8,18 +8,16 @@ return {
       -- Keep logs sane (your lsp.log was getting huge)
       vim.lsp.log.set_level("ERROR")
 
-      -- Buffer-local LSP keymaps
+      -- Buffer-local LSP keymaps. Neovim provides the rest by default:
+      -- K hover, grr references, grn rename, gra code action,
+      -- gri implementation, grt type definition
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("RichVimLspAttach", { clear = true }),
         callback = function(args)
           local bufnr = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          local opts = { buffer = bufnr }
 
-          vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-          vim.keymap.set("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Find References" }))
-          vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Info" }))
-          vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr, desc = "Go to Definition" })
 
           if not client then return end
 
@@ -153,18 +151,21 @@ return {
         },
       })
 
-      -- Format on save via null-ls only
+      -- Format via null-ls only, both on save and on demand
+      local function format(bufnr)
+        vim.lsp.buf.format({
+          bufnr = bufnr,
+          async = false,
+          name = "null-ls",
+          timeout_ms = 10000,
+        })
+      end
+
       vim.api.nvim_create_autocmd("BufWritePre", {
         group = vim.api.nvim_create_augroup("RichVimFormatOnSave", { clear = true }),
-        callback = function(args)
-          vim.lsp.buf.format({
-            bufnr = args.buf,
-            async = false,
-            name = "null-ls",
-            timeout_ms = 10000,
-          })
-        end,
+        callback = function(args) format(args.buf) end,
       })
+      vim.keymap.set("n", "<leader>cf", function() format(0) end, { desc = "Format File" })
     end,
   },
 }
