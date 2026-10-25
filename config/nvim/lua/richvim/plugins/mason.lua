@@ -1,7 +1,12 @@
+-- Standalone tools Mason should keep installed (not LSP servers or none-ls sources).
+local tools = {
+  "tree-sitter-cli", -- compiles parsers for nvim-treesitter (main branch)
+}
+
 return {
-  "williamboman/mason.nvim",
+  "mason-org/mason.nvim",
   dependencies = {
-    "williamboman/mason-lspconfig.nvim", -- Bridges Mason with lspconfig
+    "mason-org/mason-lspconfig.nvim", -- Bridges Mason with lspconfig
     "jay-babu/mason-null-ls.nvim", -- Optional: for linters/formatters
   },
   config = function()
@@ -21,7 +26,9 @@ return {
         "lua_ls",   -- Lua LSP (for Neovim)
         "pyright",  -- Python LSP
       },
-      automatic_installation = false, -- Auto-install missing LSPs
+      -- Servers are enabled explicitly in plugins/lsp.lua. Without this, every
+      -- Mason-installed server is started (e.g. Mason's rubocop/stylua as LSPs).
+      automatic_enable = false,
     })
 
     require("mason-null-ls").setup({
@@ -32,5 +39,13 @@ return {
       },
       automatic_installation = false,
     })
+
+    local registry = require("mason-registry")
+    registry.refresh(function()
+      for _, name in ipairs(tools) do
+        local pkg = registry.get_package(name)
+        if not pkg:is_installed() then pkg:install() end
+      end
+    end)
   end
 }

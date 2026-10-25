@@ -1,16 +1,19 @@
 local M = {}
 
-local function has_ruby_lsp(root)
-  local lock = root .. "/Gemfile.lock"
-  local ok, lines = pcall(vim.fn.readfile, lock)
-  if ok then
-    for _, line in ipairs(lines) do
-      if line:match("^%s*ruby%-lsp%s*%(") then
-        return true
-      end
+local function in_bundle(root, gem)
+  local ok, lines = pcall(vim.fn.readfile, root .. "/Gemfile.lock")
+  if not ok then return false end
+  local pattern = "^%s*" .. vim.pesc(gem) .. "%s*%("
+  for _, line in ipairs(lines) do
+    if line:match(pattern) then
+      return true
     end
   end
-  return vim.uv.fs_stat(root .. "/.ruby-lsp") ~= nil
+  return false
+end
+
+local function has_ruby_lsp(root)
+  return in_bundle(root, "ruby-lsp") or vim.uv.fs_stat(root .. "/.ruby-lsp") ~= nil
 end
 
 local function project_root(bufnr)
@@ -33,6 +36,22 @@ function M.solargraph_root_dir(bufnr, on_dir)
   local root = project_root(bufnr)
   if root and not has_ruby_lsp(root) then
     on_dir(root)
+  end
+end
+
+-- Builds a vim.lsp.config `cmd` that runs the project's bundled copy of `gem`
+-- via `bundle exec` when it's in Gemfile.lock, else the globally installed one.
+-- (`bundle exec` fails outright when the gem isn't part of the bundle.)
+function M.cmd(gem, args)
+  return function(dispatchers, config)
+    local cmd = vim.list_extend({ gem }, args or {})
+    if config.root_dir and in_bundle(config.root_dir, gem) then
+      cmd = vim.list_extend({ "bundle", "exec" }, cmd)
+    end
+    return vim.lsp.rpc.start(cmd, dispatchers, {
+      cwd = config.cmd_cwd or config.root_dir,
+      env = config.cmd_env,
+    })
   end
 end
 

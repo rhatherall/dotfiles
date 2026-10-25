@@ -4,19 +4,11 @@ local autocmd = vim.api.nvim_create_autocmd
 -- Create a general group for autocmds
 local richvim_group = augroup("RichVim", {})
 
--- Auto-Reload Neovim Config on Save
-autocmd("BufWritePost", {
-  pattern = { "init.lua", "lua/richvim/**/*.lua" },
-  group = richvim_group,
-  command = "source <afile>",
-  desc = "Auto-reload Neovim config on save",
-})
-
 -- Highlight Yanked Text for 200ms
 autocmd("TextYankPost", {
   group = richvim_group,
   callback = function()
-    vim.highlight.on_yank({ timeout = 200 })
+    vim.hl.on_yank({ timeout = 200 })
   end,
   desc = "Highlight yanked text",
 })
@@ -24,7 +16,7 @@ autocmd("TextYankPost", {
 -- Close Certain Filetypes with `q`
 autocmd("FileType", {
   group = richvim_group,
-  pattern = { "help", "man", "lspinfo", "qf", "nvimtree", "toggleterm" },
+  pattern = { "help", "man", "checkhealth", "qf", "NvimTree", "toggleterm" },
   callback = function()
     vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = true, silent = true })
   end,
@@ -35,14 +27,20 @@ autocmd("FileType", {
 autocmd("BufWritePre", {
   group = richvim_group,
   pattern = "*",
-  command = [[%s/\s\+$//e]],
+  callback = function(args)
+    if not vim.bo[args.buf].modifiable or vim.bo[args.buf].binary then return end
+    local view = vim.fn.winsaveview() -- :s would otherwise jump the cursor
+    vim.cmd([[keeppatterns %s/\s\+$//e]])
+    vim.fn.winrestview(view)
+  end,
   desc = "Remove trailing whitespace on save",
 })
 
 -- Open File at Last Cursor Position
 autocmd("BufReadPost", {
   group = richvim_group,
-  callback = function()
+  callback = function(args)
+    if vim.tbl_contains({ "gitcommit", "gitrebase" }, vim.bo[args.buf].filetype) then return end
     local row, col = unpack(vim.api.nvim_buf_get_mark(0, '"'))
     if row > 0 and row <= vim.api.nvim_buf_line_count(0) then
       vim.api.nvim_win_set_cursor(0, { row, col })

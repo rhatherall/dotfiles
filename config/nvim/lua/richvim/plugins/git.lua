@@ -23,8 +23,8 @@ return {
 
   -- Neogit (Magit-like Git UI)
   {
-    "TimUntersberger/neogit",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    "NeogitOrg/neogit",
+    dependencies = { "nvim-lua/plenary.nvim", "sindrets/diffview.nvim" },
     config = function()
       require("neogit").setup({ integrations = { diffview = true } })
       vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", { desc = "Open Neogit" })

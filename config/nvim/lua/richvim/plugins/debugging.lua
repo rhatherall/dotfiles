@@ -4,6 +4,7 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
       "rcarriga/nvim-dap-ui", -- UI for DAP
+      "nvim-neotest/nvim-nio", -- Required by nvim-dap-ui
       "suketa/nvim-dap-ruby", -- Ruby DAP Adapter
     },
     config = function()

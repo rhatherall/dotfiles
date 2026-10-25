@@ -3,9 +3,10 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "hrsh7th/cmp-nvim-lsp" },
     config = function()
       -- Keep logs sane (your lsp.log was getting huge)
-      vim.lsp.set_log_level("ERROR")
+      vim.lsp.log.set_level("ERROR")
 
       -- Buffer-local LSP keymaps
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -39,17 +40,22 @@ return {
         end,
       })
 
-      -- Normalize position encoding to avoid mixed-client weirdness
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.general = capabilities.general or {}
-      capabilities.general.positionEncodings = { "utf-16" }
+      -- Shared by every server: nvim-cmp completion capabilities, plus a
+      -- normalized position encoding to avoid mixed-client weirdness
+      vim.lsp.config("*", {
+        capabilities = vim.tbl_deep_extend(
+          "force",
+          vim.lsp.protocol.make_client_capabilities(),
+          require("cmp_nvim_lsp").default_capabilities(),
+          { general = { positionEncodings = { "utf-16" } } }
+        ),
+      })
 
       -- Per-project selector (ruby-lsp if present in Gemfile.lock or .ruby-lsp/ exists; else solargraph)
       local ruby_selector = require("richvim.lsp.ruby_selector")
 
       -- Lua LSP
       vim.lsp.config("lua_ls", {
-        capabilities = capabilities,
         filetypes = { "lua" },
         settings = {
           Lua = {
@@ -67,19 +73,17 @@ return {
 
       -- ruby-lsp (modern projects)
       vim.lsp.config("ruby_lsp", {
-        capabilities = capabilities,
         filetypes = { "ruby", "eruby" },
         root_dir = ruby_selector.ruby_lsp_root_dir,
-        cmd = { "bundle", "exec", "ruby-lsp" },
+        cmd = ruby_selector.cmd("ruby-lsp"),
       })
       vim.lsp.enable("ruby_lsp")
 
       -- Solargraph (legacy projects)
       vim.lsp.config("solargraph", {
-        capabilities = capabilities,
         filetypes = { "ruby" },
         root_dir = ruby_selector.solargraph_root_dir,
-        cmd = { "bundle", "exec", "solargraph", "stdio" },
+        cmd = ruby_selector.cmd("solargraph", { "stdio" }),
         settings = {
           solargraph = {
             diagnostics = true,
@@ -90,6 +94,9 @@ return {
         },
       })
       vim.lsp.enable("solargraph")
+
+      -- Python (installed by mason-lspconfig)
+      vim.lsp.enable("pyright")
 
       -- IMPORTANT:
       -- Do NOT also enable rubocop / standardrb as LSP servers if you're using none-ls for rubocop.
