@@ -25,3 +25,8 @@ vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
+
+-- Ruby provider (:ruby, Ruby remote plugins) through asdf's shim, so it uses the
+-- project's Ruby. Naming the host skips Neovim's check, which runs it once per
+-- session (100-200ms through the shim) when a Ruby file first opens.
+vim.g.ruby_host_prog = "~/.asdf/shims/neovim-ruby-host"
