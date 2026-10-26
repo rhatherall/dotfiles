@@ -21,7 +21,7 @@ return {
 
           if not client then return end
 
-          -- Let none-ls own formatting
+          -- Solargraph is only for navigating legacy projects; don't let it format
           if client.name == "solargraph" then
             client.server_capabilities.documentFormattingProvider = false
           end
@@ -69,25 +69,27 @@ return {
       })
       vim.lsp.enable("lua_ls")
 
-      -- ruby-lsp (modern projects)
+      -- ruby-lsp (Ruby 3.0+): navigation, completion, plus RuboCop/Standard
+      -- diagnostics and formatting using the project's own config. Run from the
+      -- global gem, not `bundle exec`: it builds its own bundle in .ruby-lsp/
+      -- that includes the project's Gemfile.
       vim.lsp.config("ruby_lsp", {
         filetypes = { "ruby", "eruby" },
         root_dir = ruby_selector.ruby_lsp_root_dir,
-        cmd = ruby_selector.cmd("ruby-lsp"),
+        cmd = ruby_selector.cmd({ "ruby-lsp" }),
       })
       vim.lsp.enable("ruby_lsp")
 
-      -- Solargraph (legacy projects)
+      -- Solargraph (Ruby < 3.0): navigation only, for legacy projects
       vim.lsp.config("solargraph", {
         filetypes = { "ruby" },
         root_dir = ruby_selector.solargraph_root_dir,
-        cmd = ruby_selector.cmd("solargraph", { "stdio" }),
+        cmd = ruby_selector.cmd({ "solargraph", "stdio" }),
         settings = {
           solargraph = {
-            diagnostics = true,
+            diagnostics = false,
             formatting = false,
             completion = true,
-            useBundler = true,
           },
         },
       })
@@ -95,77 +97,89 @@ return {
 
       -- Python (installed by mason-lspconfig)
       vim.lsp.enable("pyright")
-
-      -- IMPORTANT:
-      -- Do NOT also enable rubocop / standardrb as LSP servers if you're using none-ls for rubocop.
-      -- That was a big source of hangs and encoding mismatch in your earlier :LspInfo.
     end,
   },
 
-  -- None-LS (RuboCop diagnostics + formatting + format-on-save)
+  -- Formatting: on save and <leader>cf
   {
-    "nvimtools/none-ls.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvimtools/none-ls-extras.nvim",
+    "stevearc/conform.nvim",
+    event = "BufWritePre",
+    cmd = "ConformInfo",
+    keys = {
+      {
+        "<leader>cf",
+        function()
+          if not require("conform").format() then
+            vim.notify("No formatter available for this buffer (see :ConformInfo)", vim.log.levels.WARN, { title = "Format" })
+          end
+        end,
+        desc = "Format File",
+      },
     },
-    event = { "BufReadPre", "BufNewFile" },
     config = function()
-      local null_ls = require("null-ls")
-      local shellcheck = require("richvim.diagnostics.shellcheck")
+      local formatters_by_ft = {
+        -- ruby-lsp formats with the project's own RuboCop/Standard config
+        ruby = { lsp_format = "prefer" },
+        eruby = { "htmlbeautifier" },
+      }
+      for _, ft in ipairs({
+        "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "astro",
+        "css", "scss", "less", "html", "json", "jsonc", "yaml", "markdown", "graphql", "handlebars",
+      }) do
+        formatters_by_ft[ft] = { "prettier" }
+      end
 
-      null_ls.setup({
-        sources = {
-          -- RuboCop formatting (Bundler)
-          null_ls.builtins.formatting.rubocop.with({
+      require("conform").setup({
+        formatters_by_ft = formatters_by_ft,
+        formatters = {
+          -- Only for projects that bundle it, run through Bundler
+          htmlbeautifier = {
             command = "bundle",
-            args = { "exec", "rubocop", "--autocorrect-all", "-f", "quiet", "--stderr", "--stdin", "$FILENAME" },
-          }),
-
-          -- RuboCop diagnostics (Bundler)
-          null_ls.builtins.diagnostics.rubocop.with({
-            command = "bundle",
-            args = { "exec", "rubocop", "--format", "json", "--force-exclusion", "--stdin", "$FILENAME" },
-          }),
-
-          -- htmlbeautifier for ERB (Bundler, only when gem is available)
-          null_ls.builtins.formatting.htmlbeautifier.with({
-            command = "bundle",
-            args = { "exec", "htmlbeautifier", "$FILENAME" },
-            runtime_condition = function(params)
-              local lock = vim.fs.root(params.bufnr, { "Gemfile.lock" })
-              if not lock then return false end
-              local ok, lines = pcall(vim.fn.readfile, lock .. "/Gemfile.lock")
+            args = { "exec", "htmlbeautifier" },
+            cwd = require("conform.util").root_file({ "Gemfile.lock" }),
+            require_cwd = true,
+            condition = function(_, ctx)
+              local root = vim.fs.root(ctx.buf, { "Gemfile.lock" })
+              if not root then return false end
+              local ok, lines = pcall(vim.fn.readfile, root .. "/Gemfile.lock")
               if not ok then return false end
               for _, line in ipairs(lines) do
                 if line:match("^%s*htmlbeautifier%s*%(") then return true end
               end
               return false
             end,
-          }),
-
-          -- Other
-          null_ls.builtins.formatting.prettier,
-          shellcheck,
-          null_ls.builtins.code_actions.gitsigns,
+          },
         },
+        default_format_opts = { timeout_ms = 10000 },
+        format_on_save = {},
       })
+    end,
+  },
 
-      -- Format via null-ls only, both on save and on demand
-      local function format(bufnr)
-        vim.lsp.buf.format({
-          bufnr = bufnr,
-          async = false,
-          name = "null-ls",
-          timeout_ms = 10000,
-        })
-      end
+  -- Linting: ShellCheck for sh and zsh
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local lint = require("lint")
+      local shellcheck = lint.linters.shellcheck
 
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = vim.api.nvim_create_augroup("RichVimFormatOnSave", { clear = true }),
-        callback = function(args) format(args.buf) end,
+      -- ShellCheck doesn't support zsh; checking it as bash still catches
+      -- most mistakes without flagging every file for a missing shebang
+      lint.linters.shellcheck_zsh = vim.tbl_extend("force", shellcheck, {
+        args = vim.list_extend({ "--shell=bash" }, vim.deepcopy(shellcheck.args)),
       })
-      vim.keymap.set("n", "<leader>cf", function() format(0) end, { desc = "Format File" })
+      lint.linters_by_ft = {
+        sh = { "shellcheck" },
+        zsh = { "shellcheck_zsh" },
+      }
+
+      -- FileType as well as BufReadPost: this plugin loads during the first
+      -- buffer's BufReadPost, which can be before its filetype is detected
+      vim.api.nvim_create_autocmd({ "BufReadPost", "FileType", "BufWritePost", "InsertLeave" }, {
+        group = vim.api.nvim_create_augroup("RichVimLint", { clear = true }),
+        callback = function() lint.try_lint() end,
+      })
     end,
   },
 }

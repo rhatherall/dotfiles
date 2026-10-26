@@ -17,6 +17,19 @@ return {
           changedelete = { text = "~" },
         },
         current_line_blame = true, -- Show git blame inline
+        on_attach = function(bufnr)
+          local gitsigns = require("gitsigns")
+          local function map(lhs, rhs, desc)
+            vim.keymap.set("n", lhs, rhs, { buffer = bufnr, desc = desc })
+          end
+
+          map("]h", function() gitsigns.nav_hunk("next") end, "Next Hunk")
+          map("[h", function() gitsigns.nav_hunk("prev") end, "Previous Hunk")
+          map("<leader>gs", gitsigns.stage_hunk, "Stage Hunk")
+          map("<leader>gr", gitsigns.reset_hunk, "Reset Hunk")
+          map("<leader>gp", gitsigns.preview_hunk, "Preview Hunk")
+          map("<leader>gb", gitsigns.blame_line, "Blame Line")
+        end,
       }
     end
   },

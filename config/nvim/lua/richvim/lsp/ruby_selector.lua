@@ -1,19 +1,29 @@
+-- Chooses the Ruby language server per project: ruby-lsp, which needs Ruby 3.0+,
+-- or solargraph for older projects so legacy code can still be navigated.
 local M = {}
 
-local function in_bundle(root, gem)
-  local ok, lines = pcall(vim.fn.readfile, root .. "/Gemfile.lock")
-  if not ok then return false end
-  local pattern = "^%s*" .. vim.pesc(gem) .. "%s*%("
-  for _, line in ipairs(lines) do
-    if line:match(pattern) then
-      return true
+local versions = {} -- project root -> RUBY_VERSION, or false when it can't be run
+
+-- The project's Ruby as asdf resolves it from the project's version files.
+local function ruby_version(root)
+  if versions[root] == nil then
+    local result = vim.system({ "ruby", "-e", "print RUBY_VERSION" }, { cwd = root, text = true }):wait(5000)
+    versions[root] = result.code == 0 and result.stdout or false
+    if not versions[root] then
+      -- Otherwise the language server fails to start with only a log entry
+      local reason = vim.split(vim.trim(result.stderr or ""), "\n")[1] or ""
+      vim.notify(("Can't run Ruby in %s, so no Ruby LSP: %s"):format(vim.fn.fnamemodify(root, ":~"), reason),
+        vim.log.levels.WARN, { title = "Ruby LSP" })
     end
   end
-  return false
+  return versions[root] or nil
 end
 
-local function has_ruby_lsp(root)
-  return in_bundle(root, "ruby-lsp") or vim.uv.fs_stat(root .. "/.ruby-lsp") ~= nil
+-- true for Ruby < 3.0, false for 3.0+, nil when the project's Ruby can't run
+local function legacy_ruby(root)
+  local version = ruby_version(root)
+  if version == nil then return nil end
+  return vim.version.lt(version, "3.0")
 end
 
 local function project_root(bufnr)
@@ -27,27 +37,22 @@ end
 
 function M.ruby_lsp_root_dir(bufnr, on_dir)
   local root = project_root(bufnr)
-  if root and has_ruby_lsp(root) then
+  if root and legacy_ruby(root) == false then
     on_dir(root)
   end
 end
 
 function M.solargraph_root_dir(bufnr, on_dir)
   local root = project_root(bufnr)
-  if root and not has_ruby_lsp(root) then
+  if root and legacy_ruby(root) then
     on_dir(root)
   end
 end
 
--- Builds a vim.lsp.config `cmd` that runs the project's bundled copy of `gem`
--- via `bundle exec` when it's in Gemfile.lock, else the globally installed one.
--- (`bundle exec` fails outright when the gem isn't part of the bundle.)
-function M.cmd(gem, args)
+-- Builds a vim.lsp.config `cmd` that starts the server from the project root,
+-- so asdf runs it with the project's Ruby rather than Neovim's cwd's.
+function M.cmd(cmd)
   return function(dispatchers, config)
-    local cmd = vim.list_extend({ gem }, args or {})
-    if config.root_dir and in_bundle(config.root_dir, gem) then
-      cmd = vim.list_extend({ "bundle", "exec" }, cmd)
-    end
     return vim.lsp.rpc.start(cmd, dispatchers, {
       cwd = config.cmd_cwd or config.root_dir,
       env = config.cmd_env,

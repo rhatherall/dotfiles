@@ -1,13 +1,14 @@
--- Standalone tools Mason should keep installed (not LSP servers or none-ls sources).
+-- Standalone tools Mason should keep installed (LSP servers are listed below).
 local tools = {
   "tree-sitter-cli", -- compiles parsers for nvim-treesitter (main branch)
+  "prettier",        -- conform.nvim: JS/TS/CSS/JSON/YAML/Markdown formatting
+  "shellcheck",      -- nvim-lint: sh/zsh diagnostics
 }
 
 return {
   "mason-org/mason.nvim",
   dependencies = {
     "mason-org/mason-lspconfig.nvim", -- Bridges Mason with lspconfig
-    "jay-babu/mason-null-ls.nvim", -- Optional: for linters/formatters
   },
   config = function()
     require("mason").setup({
@@ -29,15 +30,6 @@ return {
       -- Servers are enabled explicitly in plugins/lsp.lua. Without this, every
       -- Mason-installed server is started (e.g. Mason's rubocop/stylua as LSPs).
       automatic_enable = false,
-    })
-
-    require("mason-null-ls").setup({
-      ensure_installed = {
-        "stylua",   -- Lua formatter
-        "prettier", -- JS/TS/CSS formatter
-        "eslint_d", -- JS linter
-      },
-      automatic_installation = false,
     })
 
     local registry = require("mason-registry")
