@@ -1,0 +1,7 @@
+bundler
+debug
+github_changelog_generator
+pry
+gem-ctags
+neovim
+ruby-lsp
