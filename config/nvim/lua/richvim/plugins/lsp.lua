@@ -1,3 +1,28 @@
+-- ruby-lsp only re-indexes an open file when asked for its outline, and only
+-- if the last edit touched a declaration. Neovim doesn't ask, so `gd` can't
+-- find methods added since the file was opened, or ruby-lsp-rspec's `let`s
+-- (spec files are left out of the workspace index). Ask on attach and after
+-- every change; a delay would let later edits hide the one that matters.
+local function keep_ruby_index_current(client, bufnr)
+  local function request_outline()
+    local params = { textDocument = vim.lsp.util.make_text_document_params(bufnr) }
+    client:request("textDocument/documentSymbol", params, function() end, bufnr)
+  end
+
+  local group = vim.api.nvim_create_augroup("RichVimRubyIndex", { clear = false })
+  vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr }) -- from a previous ruby-lsp
+  vim.api.nvim_create_autocmd("LspNotify", {
+    group = group,
+    buffer = bufnr,
+    callback = function(args)
+      if args.data.client_id == client.id and args.data.method == "textDocument/didChange" then
+        request_outline()
+      end
+    end,
+  })
+  request_outline()
+end
+
 return {
   -- LSP Configuration (Neovim 0.11+)
   {
@@ -24,6 +49,10 @@ return {
           -- Solargraph is only for navigating legacy projects; don't let it format
           if client.name == "solargraph" then
             client.server_capabilities.documentFormattingProvider = false
+          end
+
+          if client.name == "ruby_lsp" and vim.bo[bufnr].filetype == "ruby" then
+            keep_ruby_index_current(client, bufnr)
           end
 
           -- Suppress benign NO_RESULT_CALLBACK_FOUND from ruby-lsp on eruby buffers
