@@ -6,6 +6,29 @@ local parsers = {
   "markdown", "markdown_inline", "diff", "gitcommit", "git_rebase", "dockerfile",
 }
 
+-- Ruby's own block and argument captures don't fit these keys (see
+-- queries/ruby/textobjects.scm), so Ruby buffers use the ones added there
+local ruby_captures = {
+  ["@block.outer"] = "@call_with_block.outer",
+  ["@parameter.outer"] = "@argument.outer",
+}
+
+local function capture(name)
+  return vim.bo.filetype == "ruby" and ruby_captures[name] or name
+end
+
+local function textobject(name)
+  return function()
+    require("nvim-treesitter-textobjects.select").select_textobject(capture(name), "textobjects")
+  end
+end
+
+local function jump(direction, name)
+  return function()
+    require("nvim-treesitter-textobjects.move")[direction](capture(name), "textobjects")
+  end
+end
+
 return {
   -- Treesitter: Better Syntax Highlighting & Indentation
   --
@@ -42,5 +65,53 @@ return {
         end,
       })
     end,
+  },
+
+  -- Text objects for functions, classes, blocks and arguments. Ruby files also
+  -- have Vim's own am/im (method), aM/iM (class) and ]m/[m.
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    keys = {
+      { "af", textobject("@function.outer"), mode = { "x", "o" }, desc = "a function" },
+      { "if", textobject("@function.inner"), mode = { "x", "o" }, desc = "inner function" },
+      { "ac", textobject("@class.outer"), mode = { "x", "o" }, desc = "a class" },
+      { "ic", textobject("@class.inner"), mode = { "x", "o" }, desc = "inner class" },
+      -- Not ab/ib, which are Vim's "a ( block"
+      { "ad", textobject("@block.outer"), mode = { "x", "o" }, desc = "a block (with its call in Ruby)" },
+      { "id", textobject("@block.inner"), mode = { "x", "o" }, desc = "inner block" },
+      { "aa", textobject("@parameter.outer"), mode = { "x", "o" }, desc = "an argument" },
+      { "ia", textobject("@parameter.inner"), mode = { "x", "o" }, desc = "inner argument" },
+      { "]k", jump("goto_next_start", "@block.outer"), mode = { "n", "x", "o" }, desc = "Next block" },
+      { "[k", jump("goto_previous_start", "@block.outer"), mode = { "n", "x", "o" }, desc = "Previous block" },
+      {
+        "<leader>a",
+        function() require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner") end,
+        desc = "Swap argument with next",
+      },
+      {
+        "<leader>A",
+        function() require("nvim-treesitter-textobjects.swap").swap_previous("@parameter.inner") end,
+        desc = "Swap argument with previous",
+      },
+    },
+    opts = {
+      select = {
+        -- Like targets.vim: when the cursor isn't in one, use the next one,
+        -- e.g. cia before the first argument
+        lookahead = true,
+        selection_modes = {
+          ["@function.outer"] = "V",
+          ["@class.outer"] = "V",
+          -- Whole lines, so `it` examples paste cleanly; on a chained call
+          -- (`list.map { ... }.join`) this takes the whole line
+          ["@call_with_block.outer"] = "V",
+        },
+        -- So deleting the first argument doesn't leave a space after the (
+        include_surrounding_whitespace = function(opts)
+          return opts.query_string == "@parameter.outer" or opts.query_string == "@argument.outer"
+        end,
+      },
+    },
   },
 }
