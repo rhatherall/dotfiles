@@ -7,6 +7,7 @@ return {
   -- Git Signs (Shows git diff in the sign column)
   {
     "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("gitsigns").setup {
         signs = {
@@ -38,18 +39,22 @@ return {
   {
     "NeogitOrg/neogit",
     dependencies = { "nvim-lua/plenary.nvim", "sindrets/diffview.nvim" },
+    cmd = "Neogit",
+    keys = {
+      { "<leader>gg", "<cmd>Neogit<CR>", desc = "Open Neogit" },
+    },
     config = function()
       require("neogit").setup({ integrations = { diffview = true } })
-      vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", { desc = "Open Neogit" })
     end
   },
 
   -- DiffView
   {
     "sindrets/diffview.nvim",
-    config = function()
-      vim.keymap.set("n", "<leader>gd", ":DiffviewOpen<CR>", { desc = "Open Diff View" })
-      vim.keymap.set("n", "<leader>gq", ":DiffviewClose<CR>", { desc = "Close Diff View" })
-    end
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewRefresh", "DiffviewLog" },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<CR>", desc = "Open Diff View" },
+      { "<leader>gq", "<cmd>DiffviewClose<CR>", desc = "Close Diff View" },
+    },
   },
 }

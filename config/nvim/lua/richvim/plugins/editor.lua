@@ -1,6 +1,6 @@
 return {
   -- Neovim Lua Development
-  { "bfredl/nvim-luadev" },
+  { "bfredl/nvim-luadev", cmd = "Luadev" },
 
   -- Bracket and Quote Auto-Pairing
   {

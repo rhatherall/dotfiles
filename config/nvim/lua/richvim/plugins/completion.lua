@@ -2,6 +2,7 @@ return {
     -- Completion Engine
   {
     "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",    -- LSP source
       "hrsh7th/cmp-buffer",      -- Buffer words completion
@@ -57,14 +58,16 @@ return {
 
   {
     "L3MON4D3/LuaSnip",
+    lazy = true, -- loaded by nvim-cmp
     dependencies = { "rafamadriz/friendly-snippets" },
     version = "v2.*",
     build = "make install_jsregexp",
     config = function()
       require("luasnip").config.setup({ enable_autosnippets = true })
+      -- lazy_load: each filetype's snippets are read when a buffer of that type opens
       require("luasnip.loaders.from_vscode").lazy_load()
-      require("luasnip.loaders.from_lua").load({ paths = { "~/.config/nvim/snippets" } })
-      require("luasnip.loaders.from_vscode").load({
+      require("luasnip.loaders.from_lua").lazy_load({ paths = { "~/.config/nvim/snippets" } })
+      require("luasnip.loaders.from_vscode").lazy_load({
         paths = "~/.config/nvim/snippets/yaml",
         include = { "yaml", "json" }
       })

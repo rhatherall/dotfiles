@@ -32,12 +32,19 @@ return {
       automatic_enable = false,
     })
 
-    local registry = require("mason-registry")
-    registry.refresh(function()
-      for _, name in ipairs(tools) do
-        local pkg = registry.get_package(name)
-        if not pkg:is_installed() then pkg:install() end
-      end
-    end)
+    -- After startup: loading the registry takes a few milliseconds
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "VeryLazy",
+      once = true,
+      callback = function()
+        local registry = require("mason-registry")
+        registry.refresh(function()
+          for _, name in ipairs(tools) do
+            local pkg = registry.get_package(name)
+            if not pkg:is_installed() then pkg:install() end
+          end
+        end)
+      end,
+    })
   end
 }
