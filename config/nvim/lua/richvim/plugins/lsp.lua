@@ -3,7 +3,7 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
-    dependencies = { "hrsh7th/cmp-nvim-lsp" },
+    dependencies = { "saghen/blink.cmp" },
     config = function()
       -- Keep logs sane (your lsp.log was getting huge)
       vim.lsp.log.set_level("ERROR")
@@ -38,14 +38,14 @@ return {
         end,
       })
 
-      -- Shared by every server: nvim-cmp completion capabilities, plus a
-      -- normalized position encoding to avoid mixed-client weirdness
+      -- Shared by every server: blink.cmp completion capabilities, plus a
+      -- normalized position encoding to avoid mixed-client weirdness. Set here
+      -- because blink.cmp only sets them itself once it loads, after the first
+      -- file's servers have started.
       vim.lsp.config("*", {
-        capabilities = vim.tbl_deep_extend(
-          "force",
-          vim.lsp.protocol.make_client_capabilities(),
-          require("cmp_nvim_lsp").default_capabilities(),
-          { general = { positionEncodings = { "utf-16" } } }
+        capabilities = require("blink.cmp").get_lsp_capabilities(
+          { general = { positionEncodings = { "utf-16" } } },
+          true
         ),
       })
 
@@ -77,6 +77,10 @@ return {
         filetypes = { "ruby", "eruby" },
         root_dir = ruby_selector.ruby_lsp_root_dir,
         cmd = ruby_selector.cmd({ "ruby-lsp" }),
+        -- Send each change straight away. With Neovim's default 150ms batching,
+        -- ruby-lsp can answer the signature help request blink.cmp makes on `(`
+        -- before applying autopairs' `)`, and returns nothing.
+        flags = { debounce_text_changes = 0 },
       })
       vim.lsp.enable("ruby_lsp")
 
