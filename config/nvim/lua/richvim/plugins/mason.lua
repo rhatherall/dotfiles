@@ -3,6 +3,7 @@ local tools = {
   "tree-sitter-cli", -- compiles parsers for nvim-treesitter (main branch)
   "prettier",        -- conform.nvim: JS/TS/CSS/JSON/YAML/Markdown formatting
   "shellcheck",      -- nvim-lint: sh/zsh diagnostics
+  "cfn-lint",        -- nvim-lint: CloudFormation templates
 }
 
 return {

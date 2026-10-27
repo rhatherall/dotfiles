@@ -207,11 +207,25 @@ return {
         zsh = { "shellcheck_zsh" },
       }
 
+      -- cfn-lint only for CloudFormation templates: other YAML and JSON would
+      -- fail it. A template that leaves out the optional
+      -- AWSTemplateFormatVersion isn't recognised.
+      local function cloudformation_template(bufnr)
+        if not vim.tbl_contains({ "yaml", "json" }, vim.bo[bufnr].filetype) then return false end
+        for _, line in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, 10, false)) do
+          if line:find("AWSTemplateFormatVersion", 1, true) then return true end
+        end
+        return false
+      end
+
       -- FileType as well as BufReadPost: this plugin loads during the first
       -- buffer's BufReadPost, which can be before its filetype is detected
       vim.api.nvim_create_autocmd({ "BufReadPost", "FileType", "BufWritePost", "InsertLeave" }, {
         group = vim.api.nvim_create_augroup("RichVimLint", { clear = true }),
-        callback = function() lint.try_lint() end,
+        callback = function(args)
+          lint.try_lint()
+          if cloudformation_template(args.buf) then lint.try_lint("cfn_lint") end
+        end,
       })
     end,
   },
