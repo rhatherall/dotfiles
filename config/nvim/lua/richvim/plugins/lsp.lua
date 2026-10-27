@@ -23,6 +23,16 @@ local function keep_ruby_index_current(client, bufnr)
   request_outline()
 end
 
+-- Rails runs some YAML through ERB before parsing it (config/database.yml), and
+-- a line that is only an ERB tag isn't YAML until then. ERB inside a value
+-- (password: <%= ... %>) parses, so only a line starting with one counts.
+local function erb_templated(bufnr)
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
+    if line:match("^%s*<%%") then return true end
+  end
+  return false
+end
+
 return {
   -- LSP Configuration (Neovim 0.11+)
   {
@@ -53,6 +63,10 @@ return {
 
           if client.name == "ruby_lsp" and vim.bo[bufnr].filetype == "ruby" then
             keep_ruby_index_current(client, bufnr)
+          end
+
+          if client.name == "yamlls" and erb_templated(bufnr) then
+            vim.diagnostic.enable(false, { bufnr = bufnr, ns_id = vim.lsp.diagnostic.get_namespace(client.id, false) })
           end
 
           -- Suppress benign NO_RESULT_CALLBACK_FOUND from ruby-lsp on eruby buffers
@@ -130,6 +144,25 @@ return {
 
       -- Python (installed by mason-lspconfig)
       vim.lsp.enable("pyright")
+
+      -- YAML: checks files against the schemas schemastore.org lists for
+      -- their names (GitHub workflows, docker-compose and so on). CloudFormation's
+      -- short-form functions are custom tags, which it reports as errors unless
+      -- declared; cfn-lint checks the templates themselves.
+      vim.lsp.config("yamlls", {
+        settings = {
+          yaml = {
+            customTags = {
+              "!And sequence", "!Base64", "!Base64 mapping", "!Cidr sequence", "!Condition",
+              "!Equals sequence", "!FindInMap sequence", "!GetAtt", "!GetAtt sequence", "!GetAZs",
+              "!If sequence", "!ImportValue", "!ImportValue mapping", "!Join sequence", "!Not sequence",
+              "!Or sequence", "!Ref", "!Select sequence", "!Split sequence", "!Sub", "!Sub sequence",
+              "!Transform mapping",
+            },
+          },
+        },
+      })
+      vim.lsp.enable("yamlls")
     end,
   },
 
