@@ -23,6 +23,28 @@ autocmd("FileType", {
   desc = "Close certain filetypes with 'q'",
 })
 
+-- Wrap and Spell-Check Prose
+autocmd("FileType", {
+  group = richvim_group,
+  pattern = { "markdown", "gitcommit" },
+  callback = function(args)
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.breakindent = true
+    vim.opt_local.breakindentopt = "list:-1" -- under the list item's text, not its bullet
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en_gb"
+    -- A paragraph is often one line, so j/k move by screen line. With a count
+    -- they move by real lines, which is what relative numbers show.
+    for _, key in ipairs({ "j", "k" }) do
+      vim.keymap.set({ "n", "x" }, key, function()
+        return vim.v.count == 0 and "g" .. key or key
+      end, { buffer = args.buf, expr = true })
+    end
+  end,
+  desc = "Wrap and spell-check prose",
+})
+
 -- Remove Trailing Whitespace on Save
 autocmd("BufWritePre", {
   group = richvim_group,
