@@ -10,4 +10,5 @@ return {
   { import = "richvim.plugins.debugging" },  -- Debugging (DAP)
   { import = "richvim.plugins.editor" },     -- Editor Enhancements
   { import = "richvim.plugins.extras" },     -- Extras (which-key, surround, etc.)
+  { import = "richvim.plugins.claude" },     -- Claude Code connection
 }

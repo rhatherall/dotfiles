@@ -85,12 +85,12 @@ return {
       { "]k", jump("goto_next_start", "@block.outer"), mode = { "n", "x", "o" }, desc = "Next block" },
       { "[k", jump("goto_previous_start", "@block.outer"), mode = { "n", "x", "o" }, desc = "Previous block" },
       {
-        "<leader>a",
+        "<leader>cs",
         function() require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner") end,
         desc = "Swap argument with next",
       },
       {
-        "<leader>A",
+        "<leader>cS",
         function() require("nvim-treesitter-textobjects.swap").swap_previous("@parameter.inner") end,
         desc = "Swap argument with previous",
       },
