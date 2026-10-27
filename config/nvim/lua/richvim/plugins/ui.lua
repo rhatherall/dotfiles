@@ -54,15 +54,27 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "sato-s/telescope-rails.nvim", -- :Telescope rails (<leader>r maps in core/keymaps.lua)
+      -- Compiled sorter; Telescope's own is Lua and slows on long result lists
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
     cmd = "Telescope",
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find Files" },
       { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
+      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
+      { "<leader>fr", "<cmd>Telescope resume<CR>", desc = "Resume Last Search" },
+      -- A charwise selection in visual mode, otherwise the word under the cursor
+      { "<leader>fw", function() require("telescope.builtin").grep_string() end, mode = { "n", "x" }, desc = "Grep Word" },
+      { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
+      { "<leader>fs", "<cmd>Telescope lsp_dynamic_workspace_symbols<CR>", desc = "Workspace Symbols" },
     },
     config = function()
       require("telescope").setup({})
       require("telescope").load_extension("rails")
+      -- Without the compiled library (a failed build), keep Telescope's own sorter
+      if not pcall(require("telescope").load_extension, "fzf") then
+        vim.notify("telescope-fzf-native isn't built; run :Lazy build telescope-fzf-native.nvim", vim.log.levels.WARN, { title = "Telescope" })
+      end
     end
   },
 
