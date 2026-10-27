@@ -163,6 +163,10 @@ return {
         },
       })
       vim.lsp.enable("yamlls")
+
+      -- JavaScript (Stimulus controllers). In an importmap app the packages
+      -- aren't on disk, so only imports of the app's own files resolve.
+      vim.lsp.enable("ts_ls")
     end,
   },
 

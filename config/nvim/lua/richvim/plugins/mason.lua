@@ -28,6 +28,7 @@ return {
         "lua_ls",   -- Lua LSP (for Neovim)
         "pyright",  -- Python LSP
         "yamlls",   -- YAML LSP
+        "ts_ls",    -- JavaScript/TypeScript LSP
       },
       -- Servers are enabled explicitly in plugins/lsp.lua. Without this, every
       -- Mason-installed server is started (e.g. Mason's rubocop/stylua as LSPs).
