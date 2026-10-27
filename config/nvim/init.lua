@@ -7,6 +7,7 @@ require("richvim.core.bootstrap") -- Load Lazy.nvim bootstrap
 require("richvim.core.settings") -- General settings (options, UI tweaks)
 require("richvim.core.keymaps")  -- Keybindings
 require("richvim.core.autocmds") -- Auto commands
+require("richvim.core.autoreload") -- Reload files changed outside Neovim
 require("richvim.core.filetypes") -- File type configurations
 require("richvim.core.timewarrior") -- Timewarrior time-tracking commands
 
